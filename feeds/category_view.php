@@ -57,52 +57,43 @@ $sql = $myPager->loadSQL($sql);  #load SQL, add offset
 # connection comes first in mysqli (improved) function
 $result = mysqli_query(IDB::conn(),$sql) or die(trigger_error(mysqli_error(IDB::conn()), E_USER_ERROR));
 
-
-if(mysqli_num_rows($result) > 0)
-{#records exist - process
+#if there are records, process them
+if(mysqli_num_rows($result) > 0){
 	if($myPager->showTotal()==1){$itemz = "feed";}else{$itemz = "feeds";}  //deal with plural
     echo '<div align="center">We have ' . $myPager->showTotal() . ' ' . $itemz . '!</div>';
 	
+	#start the table
 	echo '
-	
-	<table class="table table-striped table-hover ">
-  <thead>
-    <tr>
-      <th>Feed Name</th>
-      <th>Feed Description</th>
-    </tr>
-  </thead>
-  <tbody>
-	
+		<table class="table table-striped table-hover ">
+			<thead>
+				<tr>
+					<th>Feed Name</th>
+					<th>Feed Description</th>
+				</tr>
+			</thead>
+			<tbody>
 	';
 
-	
-	while($row = mysqli_fetch_assoc($result))
-	{# process each row
-         
-		 		
+	# process each row
+	while($row = mysqli_fetch_assoc($result)){
+		
 		echo '
 			<tr>
 				<td><a href="' . VIRTUAL_PATH . 'feeds/feed_view.php?id=' . (int)$row['FeedID'] . '">' . dbOut($row['FeedTitle']) . '</a></td>
 				<td>' . dbOut($row['FeedDescription']) . '</td>
 			</tr>
 		';
-
 	}
 	
-	
-	
-	echo '
-	
-		  </tbody>
-	</table> 
-	
-	';
+	# complete the table
+	echo '</tbody></table>';
 	
 	echo $myPager->showNAV(); # show paging nav, only if enough records	 
 }else{#no records
     echo "<div align=center>What! No feeds?  There must be a mistake!!</div>";	
-}
+} #end if(mysqli_num_rows($result) > 0)
+
+#release the data
 @mysqli_free_result($result);
 
 get_footer(); #defaults to theme footer or footer_inc.php
