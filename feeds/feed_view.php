@@ -72,19 +72,23 @@ if(mysqli_num_rows($result) > 0)
 	$row = mysqli_fetch_assoc($result);
 	
 	#do the RSS stuff
+	$RSSoutput = ""; #store the RSS feed output here
 	$request = dbOut($row['FeedLink']);
 	$response = file_get_contents($request);
 	$xml = simplexml_load_string($response);
 	
-	echo '<h3 align="center">' . $xml->channel->title . '</h3>';
+	$RSSoutput .= '<h3 align="center">' . $xml->channel->title . '</h3>';
   
 	foreach($xml->channel->item as $story)
 	{
-	    echo '<table class="table table-striped table-hover ">';
-		echo '<thead><tr><td><a href="' . $story->link . '">' . $story->title . '</a></td></tr></thead>'; 
-		echo '<tr><td>' . $story->description . '</td></tr>';
-		echo '</table>';
+	    $RSSoutput .= '<table class="table table-striped table-hover ">';
+		$RSSoutput .= '<thead><tr><td><a href="' . $story->link . '">' . $story->title . '</a></td></tr></thead>'; 
+		$RSSoutput .= '<tr><td>' . $story->description . '</td></tr>';
+		$RSSoutput .= '</table>';
 	}
+	
+	#display the RSS
+	echo $RSSoutput;
 
 }else{#no records
     echo "<div align=center>What! No feeds?  There must be a mistake!!</div>";	
