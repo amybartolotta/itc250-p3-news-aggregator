@@ -1,19 +1,26 @@
 <?php
 /**
- * survey_view.php is a page to demonstrate the proof of concept of the 
- * initial SurveySez objects.
+ * category_view.php is the RSS feed list page for the RSS feed application
  *
- * Objects in this version are the Survey, Question & Answer objects
+ * The difference between demo_list.php and survey_list.php is the reference to the 
+ * Pager class which processes a mysqli SQL statement and spans records across multiple  
+ * pages. 
+ *
+ * The associated view page, survey_view.php is virtually identical to demo_view.php. 
+ * The only difference is the pager version links to the list pager version to create a 
+ * separate application from the original list/view. 
  * 
- * @package SurveySez
- * @author William Newman
- * @version 2.12 2015/06/04
- * @link http://newmanix.com/ 
+ * @package 
+ * @author Amy Bartolotta 
+ * @author Kevin Daniel
+ * @author Morgan Richmond
+ * @author Sam Richardson
+ * @version 1.0 2017/06/04
+ * @link 
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @see Question.php
- * @see Answer.php
- * @see Response.php
- * @see Choice.php
+ * @see index.php
+ * @see feed_view.php 
+ * @todo 
  */
  
 require '../inc_0700/config_inc.php'; #provides configuration, pathing, error handling, db credentials
@@ -29,18 +36,7 @@ if(isset($_GET['id']) && (int)$_GET['id'] > 0){#proper data must be on querystri
 
 
 # SQL statement
-#$sql = "select MuffinName, MuffinID, Price from test_Muffins";
 $sql = "SELECT * FROM `sp17_Feeds` WHERE `FeedCategoryID` = $myID;";
-
-/*
-$mySurvey = new SurveySez\Survey($myID); //MY_Survey extends survey class so methods can be added
-if($mySurvey->isValid)
-{
-	$config->titleTag = "'" . $mySurvey->Title . "' Survey!";
-}else{
-	$config->titleTag = smartTitle(); //use constant 
-}
-*/
 
 #END CONFIG AREA ---------------------------------------------------------- 
 
@@ -83,8 +79,7 @@ if(mysqli_num_rows($result) > 0)
 	
 	while($row = mysqli_fetch_assoc($result))
 	{# process each row
-         #echo '<div align="center"><a href="' . VIRTUAL_PATH . 'feeds/feed_view.php?id=' . (int)$row['FeedID'] . '">' . dbOut($row['FeedTitle']) . '</a>';
-         #echo '</div>';
+         
 		 		
 		echo '
 			<tr>
