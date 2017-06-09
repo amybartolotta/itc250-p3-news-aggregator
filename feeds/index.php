@@ -1,6 +1,6 @@
 <?php
 /**
- * survey_list.php along with survey_view.php provides a sample web application
+ * index.php is the RSS feed category list page for the RSS feed application
  *
  * The difference between demo_list.php and survey_list.php is the reference to the 
  * Pager class which processes a mysqli SQL statement and spans records across multiple  
@@ -11,12 +11,15 @@
  * separate application from the original list/view. 
  * 
  * @package 
- * @author 
- * @version 1.0 2017/05/04
+ * @author Amy Bartolotta 
+ * @author Kevin Daniel
+ * @author Morgan Richmond
+ * @author Sam Richardson
+ * @version 1.0 2017/06/04
  * @link 
  * @license http://www.apache.org/licenses/LICENSE-2.0
- * @see survey_view.php
- * @see Pager.php 
+ * @see category_view.php
+ * @see feed_view.php 
  * @todo 
  */
 
@@ -24,30 +27,16 @@
 require '../inc_0700/config_inc.php'; #provides configuration, pathing, error handling, db credentials 
  
 # SQL statement
-#$sql = "select MuffinName, MuffinID, Price from test_Muffins";
-#$sql = "select SurveyID, Title, Description, DateAdded, LastUpdated from sp17_surveys";
 $sql = "SELECT FeedCategoryID, FeedCategoryName, FeedCategoryDescription FROM `sp17_FeedCategories`;";
 
 
 #Fills <title> tag. If left empty will default to $PageTitle in config_inc.php  
-$config->titleTag = 'ITC 250 SP17 News Feeds';
+$config->titleTag = 'ITC 250 SP17 News Feed Categories';
+
 
 #Fills <meta> tags.  Currently we're adding to the existing meta tags in config_inc.php
-$config->metaDescription = 'Seattle Central\'s ITC250 Class Surveys are made with pure PHP! ' . $config->metaDescription;
-$config->metaKeywords = 'Surveys,PHP,Fun,Bran,Regular,Regular Expressions,'. $config->metaKeywords;
-
-/*
-$config->metaDescription = 'Web Database ITC281 class website.'; #Fills <meta> tags.
-$config->metaKeywords = 'SCCC,Seattle Central,ITC281,database,mysql,php';
-$config->metaRobots = 'no index, no follow';
-$config->loadhead = ''; #load page specific JS
-$config->banner = ''; #goes inside header
-$config->copyright = ''; #goes inside footer
-$config->sidebar1 = ''; #goes inside left side of page
-$config->sidebar2 = ''; #goes inside right side of page
-$config->nav1["page.php"] = "New Page!"; #add a new page to end of nav1 (viewable this page only)!!
-$config->nav1 = array("page.php"=>"New Page!") + $config->nav1; #add a new page to beginning of nav1 (viewable this page only)!!
-*/
+$config->metaDescription = 'Seattle Central\'s ITC250 Class RSS readers are made with pure PHP! ' . $config->metaDescription;
+$config->metaKeywords = 'RSS,PHP,Fun,Bran,Regular,Regular Expressions,'. $config->metaKeywords;
 
 # END CONFIG AREA ---------------------------------------------------------- 
 
