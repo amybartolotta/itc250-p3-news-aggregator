@@ -61,7 +61,7 @@ $result = mysqli_query(IDB::conn(),$sql) or die(trigger_error(mysqli_error(IDB::
 
 # if we have records, process them
 if(mysqli_num_rows($result) > 0){
-	if($myPager->showTotal()==1){$itemz = "feed";}else{$itemz = "feeds";}  //deal with plural
+	if($myPager->showTotal()==1){$itemz = "category";}else{$itemz = "categories";}  //deal with plural
     echo '<div align="center">We have ' . $myPager->showTotal() . ' ' . $itemz . '!</div>';
 	
 	# start the table
