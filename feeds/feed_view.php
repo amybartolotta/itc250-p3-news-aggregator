@@ -51,15 +51,17 @@ get_header(); #defaults to theme header or header_inc.php
 -->
 
 <?php
+//if there isn't a session started already start one
+//prevents warning notices if session is already started
+if(!isset($_SESSION)){session_start();}
 
-# there should only be one row so we don't need the pager
-#reference images for pager
-#$prev = '<img src="' . VIRTUAL_PATH . 'images/arrow_prev.gif" border="0" />';
-#$next = '<img src="' . VIRTUAL_PATH . 'images/arrow_next.gif" border="0" />';
+#The session variable Feeds will be an array of Feed objects.  The index in the array should be the FeedID. The FeedID is $myID
 
-# Create instance of new 'pager' class
-#$myPager = new Pager(10,'',$prev,$next,'');
-#$sql = $myPager->loadSQL($sql);  #load SQL, add offset
+# check to see if there is session variable. if not make one
+if(!isset($_SESSION['Feeds'])){
+	$_SESSION['Feeds'] = array();
+}
+
 
 # connection comes first in mysqli (improved) function
 $result = mysqli_query(IDB::conn(),$sql) or die(trigger_error(mysqli_error(IDB::conn()), E_USER_ERROR));
@@ -71,14 +73,54 @@ if(mysqli_num_rows($result) > 0)
 	# there should only be one row so I don't think we need a loop
 	$row = mysqli_fetch_assoc($result);
 	
-	#do the RSS stuff
+	#setup the RSS stuff
+	$cacheTTL = 10 * 60; #this the cache time to live in seconds. If the cache is older than this we need to refresh
 	$RSSoutput = ""; #store the RSS feed output here
-	$request = dbOut($row['FeedLink']);
-	$response = file_get_contents($request);
+	$request = dbOut($row['FeedLink']); # $request now has the URL for the feed
+		
+	# check to see if there is a Feed object with $myID in the session and if not make one
+	if (!array_key_exists($myID,$_SESSION['Feeds'])){
+		
+		$response = file_get_contents($request); #this is where we are hitting the external server
+		$_SESSION['Feeds'][$myID] = new Feed($myID,$response,time()); #store the response in the session variable
+
+	}else{
+		
+		#check to see if we are forcing the clearing of the cache by returning a value for clearCache in the query string
+		if (isset($_GET['clearCache'])) {
+			$cacheTTL = 0;
+		}
+		
+		#check to see if the cache should be refreshed
+		if ((time() - $_SESSION['Feeds'][$myID]->Timestamp) > $cacheTTL){
+			
+			# the cache is stale so reload the feed
+			$response = file_get_contents($request); #this is where we are hitting the external server
+			$_SESSION['Feeds'][$myID]->Response = $response; #cache the new response
+			$_SESSION['Feeds'][$myID]->Timestamp = time(); #update the timestamp
+			
+		}else{
+
+			#the cache is still fresh so use the response from the cache
+			$response = $_SESSION['Feeds'][$myID]->Response;
+
+		} #end if ((time() - $_SESSION['Feeds'][$myID]->Timestamp) > $cacheTTL)
+	} #end if(!array_key_exists($myID,$_SESSION['Feeds']))
+		
+
+	
+	
+	#render the RSS feed
 	$xml = simplexml_load_string($response);
 	
+	#output the time the feed was cached
+	$RSSoutput .=  '<p>Cached on ' . date("l jS \of F Y h:i:s A", $_SESSION['Feeds'][$myID]->Timestamp) . " ";
+
+	#output link to force a cache refresh
+	$RSSoutput .=  '<a href="' . THIS_PAGE . '?id=' . $myID . '&clearCache=1">Refresh feed</a></p>';
+	
 	$RSSoutput .= '<h3 align="center">' . $xml->channel->title . '</h3>';
-  
+
 	foreach($xml->channel->item as $story)
 	{
 	    $RSSoutput .= '<table class="table table-striped table-hover ">';
@@ -91,11 +133,36 @@ if(mysqli_num_rows($result) > 0)
 	echo $RSSoutput;
 
 }else{#no records
-    echo "<div align=center>What! No feeds?  There must be a mistake!!</div>";	
+    echo "<div align=center>What! No feeds?  There must be a mistake!</div>";	
 }#end if(mysqli_num_rows($result) > 0)
 
 #release the data
 @mysqli_free_result($result);
 
 get_footer(); #defaults to theme footer or footer_inc.php
+
+
+
+
+
+# ------- class Feed -----------------------------------------
+
+class Feed
+{
+	//public member variables (properties)
+ 	public $ID = '';
+ 	public $Response = '';
+ 	public $Timestamp = 0;
+	
+    function __construct($id,$response,$timestamp)
+	{//constructor sets stage by adding data to an instance of the object
+		
+		$this->ID = (int)$id;
+		$this->Response = $response;
+		$this->Timestamp = (int)$timestamp;
+	}
+}
+
+
+
 ?>
